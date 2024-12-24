@@ -99,10 +99,10 @@ def process_attendance(attendance_data, hrms_data):
     return output
 
 # Streamlit Interface
-st.title("Attendance Processing System")
+st.title("Monthly Attendance Processing System!")
 
 st.subheader("Upload Files")
-attendance_file = st.file_uploader("Upload Attendance Data (Excel)", type=['xlsx'])
+attendance_file = st.file_uploader("Upload Biometric Data (Excel)", type=['xlsx'])
 hrms_file = st.file_uploader("Upload HRMS Data (CSV)", type=['csv'])
 
 if st.button("Process Files"):
