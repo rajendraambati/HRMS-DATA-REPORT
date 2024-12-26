@@ -4,7 +4,7 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_letter
 from io import BytesIO
-
+st.set_page_config(page_title="HRMS Attendance Report", page_icon="🕒")
 def process_attendance(attendance_data, hrms_data):
     # Process punch-in times in attendance data
     attendance_data['Punch IN Time'] = pd.to_datetime(attendance_data['Punch IN Time'], format='%d-%m-%Y %H:%M:%S', errors='coerce')
