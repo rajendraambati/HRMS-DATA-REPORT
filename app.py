@@ -70,7 +70,7 @@ def process_attendance(attendance_data, hrms_data):
                         if shift_name.strip().lower() == 'general' and punch_in_time > '09:45':
                             emp_row[day_column] = 'General Shift Late'
                             late_count += 1
-                        elif shift_name.strip().lower() == 'evening shift' and punch_in_time > '16:00':
+                        elif shift_name.strip().lower() == 'evening shift' and punch_in_time > '16:15':
                             emp_row[day_column] = 'Evening Shift Late'
                             late_count += 1
                         else:
