@@ -113,6 +113,13 @@ def process_attendance(attendance_data, hrms_data):
             'Half Day': PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid'),  # Yellow
         }
 
+        for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=2):
+            for cell in row:
+                cell.fill = pt_fill
+
+
+
+        
         for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=4, max_col=worksheet.max_column):
             for cell in row:
                 if cell.value in category_colors:
