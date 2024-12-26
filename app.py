@@ -103,7 +103,7 @@ def process_attendance(attendance_data, hrms_data):
             'PL': PatternFill(start_color='98FB98', end_color='98FB98', fill_type='solid'),  # Pale Green
             'CL': PatternFill(start_color='ADD8E6', end_color='ADD8E6', fill_type='solid'),  # Light Blue
             'LL': PatternFill(start_color='FFA07A', end_color='FFA07A', fill_type='solid'),  # Light Salmon
-            'LWP': PatternFill(start_color='FF4500', end_color='FF4500', fill_type='solid'),  # Orange Red
+            'LWP': PatternFill(start_color='eb9c42', end_color='eb9c42', fill_type='solid'),  # Orange Red
             'WFH': PatternFill(start_color='FFFACD', end_color='FFFACD', fill_type='solid'),  # Lemon Chiffon
             'General Shift Late': PatternFill(start_color='d8aaf2', end_color='d8aaf2', fill_type='solid'),  # Gold
             'Evening Shift Late': PatternFill(start_color='83f7f0', end_color='83f7f0', fill_type='solid'),  # Dark Orange
