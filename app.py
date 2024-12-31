@@ -1,19 +1,34 @@
-
 import streamlit as st
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_letter
 from io import BytesIO
-st.set_page_config(page_title="HRMS Attendance Report", page_icon="🕒")
+from calendar import monthrange
+from datetime import datetime
+
 def process_attendance(attendance_data, hrms_data):
     # Process punch-in times in attendance data
     attendance_data['Punch IN Time'] = pd.to_datetime(attendance_data['Punch IN Time'], format='%d-%m-%Y %H:%M:%S', errors='coerce')
     attendance_data['Time HH:MM'] = attendance_data['Punch IN Time'].dt.strftime('%H:%M')
     attendance_data['Date'] = attendance_data['Punch IN Time'].dt.date
 
+    # Determine the month and year from the data
+    first_date = attendance_data['Punch IN Time'].min()
+    if pd.isna(first_date):
+        st.error("No valid dates found in attendance data")
+        return None
+    
+    month = first_date.month
+    year = first_date.year
+    
+    # Get the number of days in the month
+    _, days_in_month = monthrange(year, month)
+
     # Output DataFrame setup
-    output_columns = ['Employee Id', 'Employee Name', 'Late Count'] + [f'Day {day}' for day in range(1, 32)] + ['Leaves Count', 'PL Count', 'CL Count', 'LL Count', 'LWP Count']
+    output_columns = ['Employee Id', 'Employee Name', 'Late Count'] + \
+                    [f'Day {day}' for day in range(1, days_in_month + 1)] + \
+                    ['Leaves Count', 'PL Count', 'CL Count', 'LL Count', 'LWP Count']
     output_data = pd.DataFrame(columns=output_columns)
 
     # Process each employee
@@ -25,13 +40,17 @@ def process_attendance(attendance_data, hrms_data):
 
         emp_row = {'Employee Id': emp_id, 'Employee Name': emp_name, 'Late Count': 0}
 
-        for day in range(1, 32):
-            day_str = f'{day:02d}-01-2024'
+        for day in range(1, days_in_month + 1):
+            day_str = f'{day:02d}-{month:02d}-{year}'  # Dynamic date format
             day_column = f'Day {day}'
             emp_row[day_column] = None
 
             if day_str in hrms_data.columns:
                 hrms_value = emp_hrms_row[day_str]
+
+                if pd.isna(hrms_value):
+                    emp_row[day_column] = None
+                    continue
 
                 if hrms_value in ['HD', 'WOff']:
                     emp_row[day_column] = hrms_value
@@ -51,7 +70,9 @@ def process_attendance(attendance_data, hrms_data):
 
                 punch_day_records = attendance_data[
                     (attendance_data['employee_id'] == emp_id) &
-                    (attendance_data['Punch IN Time'].dt.day == day)
+                    (attendance_data['Punch IN Time'].dt.day == day) &
+                    (attendance_data['Punch IN Time'].dt.month == month) &
+                    (attendance_data['Punch IN Time'].dt.year == year)
                 ]
 
                 if hrms_value == 'PT':
@@ -100,20 +121,29 @@ def process_attendance(attendance_data, hrms_data):
     return output
 
 # Streamlit Interface
-st.title("Monthly Attendance Processing System!")
+st.title("Attendance Processing System")
 
 st.subheader("Upload Files")
-attendance_file = st.file_uploader("Upload Biometric Data (Excel)", type=['xlsx'])
+attendance_file = st.file_uploader("Upload Attendance Data (Excel)", type=['xlsx'])
 hrms_file = st.file_uploader("Upload HRMS Data (CSV)", type=['csv'])
 
 if st.button("Process Files"):
     if attendance_file and hrms_file:
-        attendance_data = pd.read_excel(attendance_file)
-        hrms_data = pd.read_csv(hrms_file)
+        try:
+            attendance_data = pd.read_excel(attendance_file)
+            hrms_data = pd.read_csv(hrms_file)
 
-        output = process_attendance(attendance_data, hrms_data)
-
-        st.success("Processing complete! Download your file below.")
-        st.download_button("Download Report", data=output, file_name="attendance_report.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            output = process_attendance(attendance_data, hrms_data)
+            
+            if output:
+                st.success("Processing complete! Download your file below.")
+                st.download_button(
+                    "Download Report",
+                    data=output,
+                    file_name="attendance_report.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        except Exception as e:
+            st.error(f"An error occurred while processing the files: {str(e)}")
     else:
         st.error("Please upload both files to proceed.")
