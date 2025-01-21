@@ -111,7 +111,7 @@ def process_attendance(attendance_data, hrms_data):
                     continue
 
                 # Get all punch records for the day using the new date format
-                punch_day_records = attendance_data[ 
+                punch_day_records = attendance_data[
                     (attendance_data['Employee_ID'] == emp_id) & 
                     (attendance_data['Punch_Date'].dt.day == day) & 
                     (attendance_data['Punch_Date'].dt.month == month) & 
@@ -130,11 +130,11 @@ def process_attendance(attendance_data, hrms_data):
                             punch_in_time = punch_day_records.iloc[0]['Time IN HH:MM']
                             shift_name = punch_day_records.iloc[0]['Shift_Name']
 
-                            if shift_name.strip().lower() == 'general' and punch_in_time >= '09:45':
-                                emp_row[day_column] = f'GSL {punch_in_time}'  # Changed from 'General Shift Late'
+                            if shift_name.strip().lower() == 'general' and punch_in_time > '09:45':
+                                emp_row[day_column] = f'GSL {punch_in_time}'
                                 late_count += 1
-                            elif shift_name.strip().lower() == 'evening shift' and punch_in_time >= '16:30':
-                                emp_row[day_column] = f'ESL {punch_in_time}'  # Changed from 'Evening Shift Late'
+                            elif shift_name.strip().lower() == 'evening shift' and punch_in_time > '16:30':
+                                emp_row[day_column] = f'ESL {punch_in_time}'
                                 late_count += 1
                             else:
                                 emp_row[day_column] = 'PT'
@@ -157,7 +157,7 @@ def process_attendance(attendance_data, hrms_data):
         workbook = writer.book
         worksheet = writer.sheets['Attendance Report']
 
-        # Updated color mapping to include the new formats
+        # Color mapping
         category_colors = {
             'HD': PatternFill(start_color='B0C4DE', end_color='B0C4DE', fill_type='solid'),
             'WOff': PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid'),
@@ -180,19 +180,21 @@ def process_attendance(attendance_data, hrms_data):
             for cell in row:
                 cell.fill = pt_fill
 
-        # Modified color application to handle the new GSL and ESL formats
+        # Modified color application to handle GSL and ESL formats
         gsl_fill = PatternFill(start_color='d8aaf2', end_color='d8aaf2', fill_type='solid')
         esl_fill = PatternFill(start_color='83f7f0', end_color='83f7f0', fill_type='solid')
         
         for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=4, max_col=worksheet.max_column):
             for cell in row:
                 if cell.value:
-                    if cell.value.startswith('GSL'):
+                    # Convert cell value to string before checking
+                    cell_value = str(cell.value)
+                    if cell_value.startswith('GSL'):
                         cell.fill = gsl_fill
-                    elif cell.value.startswith('ESL'):
+                    elif cell_value.startswith('ESL'):
                         cell.fill = esl_fill
-                    elif cell.value in category_colors:
-                        cell.fill = category_colors[cell.value]
+                    elif cell_value in category_colors:
+                        cell.fill = category_colors[cell_value]
 
     output.seek(0)
     return output
