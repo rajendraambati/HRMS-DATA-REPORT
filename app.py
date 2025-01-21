@@ -130,10 +130,10 @@ def process_attendance(attendance_data, hrms_data):
                             punch_in_time = punch_day_records.iloc[0]['Time IN HH:MM']
                             shift_name = punch_day_records.iloc[0]['Shift_Name']
 
-                            if shift_name.strip().lower() == 'general' and punch_in_time > '09:45':
+                            if shift_name.strip().lower() == 'general' and punch_in_time >= '09:45':
                                 emp_row[day_column] = f'GSL {punch_in_time}'  # Changed from 'General Shift Late'
                                 late_count += 1
-                            elif shift_name.strip().lower() == 'evening shift' and punch_in_time > '16:30':
+                            elif shift_name.strip().lower() == 'evening shift' and punch_in_time >= '16:30':
                                 emp_row[day_column] = f'ESL {punch_in_time}'  # Changed from 'Evening Shift Late'
                                 late_count += 1
                             else:
