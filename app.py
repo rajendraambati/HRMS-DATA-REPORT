@@ -131,10 +131,10 @@ def process_attendance(attendance_data, hrms_data):
                             shift_name = punch_day_records.iloc[0]['Shift_Name']
 
                             if shift_name.strip().lower() == 'general' and punch_in_time > '09:45':
-                                emp_row[day_column] = 'General Shift Late'
+                                emp_row[day_column] = f'GSL {punch_in_time}'  # Changed from 'General Shift Late'
                                 late_count += 1
                             elif shift_name.strip().lower() == 'evening shift' and punch_in_time > '16:30':
-                                emp_row[day_column] = 'Evening Shift Late'
+                                emp_row[day_column] = f'ESL {punch_in_time}'  # Changed from 'Evening Shift Late'
                                 late_count += 1
                             else:
                                 emp_row[day_column] = 'PT'
@@ -157,7 +157,7 @@ def process_attendance(attendance_data, hrms_data):
         workbook = writer.book
         worksheet = writer.sheets['Attendance Report']
 
-        # Color mapping remains the same
+        # Updated color mapping to include the new formats
         category_colors = {
             'HD': PatternFill(start_color='B0C4DE', end_color='B0C4DE', fill_type='solid'),
             'WOff': PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid'),
@@ -166,8 +166,6 @@ def process_attendance(attendance_data, hrms_data):
             'LL': PatternFill(start_color='FFA07A', end_color='FFA07A', fill_type='solid'),
             'LWP': PatternFill(start_color='eb9c42', end_color='eb9c42', fill_type='solid'),
             'WFH': PatternFill(start_color='FFFACD', end_color='FFFACD', fill_type='solid'),
-            'General Shift Late': PatternFill(start_color='d8aaf2', end_color='d8aaf2', fill_type='solid'),
-            'Evening Shift Late': PatternFill(start_color='83f7f0', end_color='83f7f0', fill_type='solid'),
             'Morning Punch Miss': PatternFill(start_color='FF9999', end_color='FF9999', fill_type='solid'),
             'Evening Punch Miss': PatternFill(start_color='FFB366', end_color='FFB366', fill_type='solid'),
             'AT': PatternFill(start_color='FF0000', end_color='FF0000', fill_type='solid'),
@@ -182,11 +180,19 @@ def process_attendance(attendance_data, hrms_data):
             for cell in row:
                 cell.fill = pt_fill
 
-        # Apply category colors to all other cells
+        # Modified color application to handle the new GSL and ESL formats
+        gsl_fill = PatternFill(start_color='d8aaf2', end_color='d8aaf2', fill_type='solid')
+        esl_fill = PatternFill(start_color='83f7f0', end_color='83f7f0', fill_type='solid')
+        
         for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=4, max_col=worksheet.max_column):
             for cell in row:
-                if cell.value in category_colors:
-                    cell.fill = category_colors[cell.value]
+                if cell.value:
+                    if cell.value.startswith('GSL'):
+                        cell.fill = gsl_fill
+                    elif cell.value.startswith('ESL'):
+                        cell.fill = esl_fill
+                    elif cell.value in category_colors:
+                        cell.fill = category_colors[cell.value]
 
     output.seek(0)
     return output
